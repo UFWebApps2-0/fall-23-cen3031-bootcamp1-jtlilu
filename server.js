@@ -1,60 +1,53 @@
-var http = require('http'), 
-    fs = require('fs'), 
+var http = require('http'),
+    fs = require('fs'),
     port = 8080;
 
 /* Global variables */
 var listingData, server;
 
-var requestHandler = function(request, response) {
-  /*Investigate the request object. 
+var requestHandler = function (request, response) {
+  /* Investigate the request object.
     You will need to use several of its properties: url and method
   */
-  //console.log(request);
+  console.log(request.url); // Log the URL being requested
+  console.log(request.method); // Log the HTTP method (GET, POST, etc.)
 
   /*
-    Your request handler should send listingData in the JSON format as a response if a GET request 
-    is sent to the '/listings' path. Otherwise, it should send a 404 error. 
-
-    HINT: Explore the request object and its properties 
-    HINT: Explore the response object and its properties
-    https://code.tutsplus.com/tutorials/http-the-protocol-every-web-developer-must-know-part-1--net-31177
-    
-    HINT: Explore how callback's work 
-    http://www.theprojectspot.com/tutorial-post/nodejs-for-beginners-callbacks/4
-    
-    HINT: Explore the list of MIME Types
-    https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
-   
-    HINT: Explore mdn web docs for resources on how to use javascript.
-    Helpful example: if-else structure- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else
-
-    */
+    Your request handler should send listingData in the JSON format as a response if a GET request
+    is sent to the '/listings' path. Otherwise, it should send a 404 error.
+  */
+  if (request.method === 'GET' && request.url === '/listings') {
+    // Send the listingData as a JSON response
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify(listingData));
+  } else {
+    // Send a 404 error response
+    response.writeHead(404, { 'Content-Type': 'text/plain' });
+    response.end('404 Not Found');
+  }
 };
 
-fs.readFile('listings.json', 'utf8', function(err, data) {
+fs.readFile('listings.json', 'utf8', function (err, data) {
   /*
-    This callback function should save the data in the listingData variable, 
-    then start the server. 
+    This callback function should save the data in the listingData variable,
+    then start the server.
+  */
 
-    HINT: Check out this resource on fs.readFile
-    //https://nodejs.org/api/fs.html#fs_fs_readfile_path_options_callback
+  // Check for errors when reading the file
+  if (err) {
+    throw err;
+  }
 
-    HINT: Read up on JSON parsing Node.js
-    http://stackoverflow.com/questions/17251553/nodejs-request-object-documentation
-   */
+  // Parse the JSON data and store it in the listingData variable
+  listingData = JSON.parse(data);
 
-    //Check for errors
-    /*this resource gives you an idea of the general format err objects and Throwing an existing object.
-    https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/throw#throwing_an_existing_object
-   */
-  
+  // Create the server
+  server = http.createServer(requestHandler);
 
-   //Save the data in the listingData variable already defined
-  
-
-  //Creates the server
-  
-  //Start the server
-
-
+  // Start the server
+  server.listen(port, function () {
+    console.log('Server is listening on port ' + port);
+  });
 });
+
+
